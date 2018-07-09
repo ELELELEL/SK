@@ -1,0 +1,368 @@
+#+--------------+
+# Made by Funky
+# Version 1.3
+#+--------------+
+options:
+	version: 1.3
+on skript load:
+	if file "plugins/Skript/scripts/Energistics/cells/cells.yml" doesn't exist:
+		create file "plugins/Skript/scripts/Energistics/cells/cells.yml"
+		send a request to "https://pastebin.com/raw/iJwdx1Bp" with headers "User-agent: SkriptDocBot"
+		set {_body} to the last received http web response's body
+		set {_body::*} to {_body} split at "||"
+		loop size of {_body::*} times:
+			write "%{_body::%loop-num%}%" at line loop-num to file "plugins/Skript/scripts/Energistics/cells/cells.yml"
+	if file "plugins/Skript/scripts/Energistics/items/jetpacks.yml" doesn't exist:
+		create file "plugins/Skript/scripts/Energistics/items/jetpacks.yml"
+		send a request to "https://pastebin.com/raw/4UdHgXuM" with headers "User-agent: SkriptDocBot"
+		set {_body} to the last received http web response's body
+		set {_body::*} to {_body} split at "||"
+		loop size of {_body::*} times:
+			write "%{_body::%loop-num%}%" at line loop-num to file "plugins/Skript/scripts/Energistics/items/jetpacks.yml"
+	if file "plugins/Skript/scripts/Energistics/items/items.yml" doesn't exist:
+		create file "plugins/Skript/scripts/Energistics/items/items.yml"
+		send a request to "https://pastebin.com/raw/W3kSDy9s" with headers "User-agent: SkriptDocBot"
+		set {_body} to the last received http web response's body
+		set {_body::*} to {_body} split at "||"
+		loop size of {_body::*} times:
+			write "%{_body::%loop-num%}%" at line loop-num to file "plugins/Skript/scripts/Energistics/items/items.yml"
+	load yaml "plugins/Skript/scripts/Energistics/items/items.yml" as "Items"
+	wait 10 ticks
+	load yaml "plugins/Skript/scripts/Energistics/cells/cells.yml" as "Cells"
+	wait 10 ticks
+	load yaml "plugins/Skript/scripts/Energistics/items/jetpacks.yml" as "Jetpacks"
+	load("Cells")
+	load("Items")
+	load("Jetpacks")
+on skript unload:
+	save yaml "Cells"
+	unload yaml "Cells"
+	save yaml "Items"
+	unload yaml "Items"
+	save yaml "Jetpacks"
+	unload yaml "Jetpacks"
+on join:
+	wait 1 ticks
+	if player is op:
+		if text from "https://pastebin.com/raw/e2yQjsAK" is not "{@version}":
+			send "&6[Energistics] &fYou are not running the newest version of &3Energistics!"
+			send "&6[Energistics] &fYou can update here &fwww.com"
+			stop
+		send "&6[Energistics] &fYou are currently running the newest version of &3Energistics"
+	send "&6[Energistics] &fRunning version &9{@version}"
+#---------------------------------------#
+#Basics
+#---------------------------------------#
+on piston extend:
+	if the moved blocks where [{cells::%location of block input%::*} is set] is set:
+		cancel event
+on piston retract:
+	if the moved blocks where [{cells::%location of block input%::*} is set] is set:
+		cancel event
+on inventory click:
+	if (player's current inventory).getType().name() is "furnace":
+		{cells::%{energistics::%player%::lastused}%::*} is set
+		if name of clicked item contains "&aEnergy":
+			cancel event
+			stop
+		if clicked item is gray glass pane named " ":
+			if cursor is not air:
+				if lore of cursor contains "&aEnergy":
+					slotzeroset(player,{energistics::%player%::lastused},clicked slot)
+					stop
+				cancel event
+				stop
+			cancel event
+			stop
+		if clicked slot is 0:
+			{cells::%{energistics::%player%::lastused}%::*} is set
+			if cursor is air:
+				slotzerotake(player,{energistics::%player%::lastused},clicked slot)
+				stop
+			cancel event
+	if name of player's current inventory is "&a&lEnergistics":
+		if clicked item is iron block named "&b&lCells":
+			gui(player,"Cells")
+		if clicked item is diamond pickaxe named "&9&lItems":
+			gui(player,"Items")
+		if clicked item is leather chestplate named "&a&lJetpacks":
+			gui(player,"Jetpacks")
+		stop
+	if name of player's current inventory is "&7&lCells":
+		if clicked item is barrier named "&c&lBACK":
+			close player's inventory
+			make player execute command "e"
+		else if clicked inventory is not player's inventory:
+			cancel event
+			if player is op:
+				give player clicked item
+	if name of player's current inventory is "&7&lItems":
+		if clicked item is barrier named "&c&lBACK":
+			close player's inventory
+			make player execute command "e"
+		else if clicked inventory is not player's inventory:
+			cancel event
+			if player is op:
+				give player clicked item
+	if name of player's current inventory is "&7&lJetpacks":
+		if clicked item is barrier named "&c&lBACK":
+			close player's inventory
+			make player execute command "e"
+		else if clicked inventory is not player's inventory:
+			cancel event
+			if player is op:
+				give player clicked item
+on rightclick:
+	if {cells::%location of event-block%::*} is set:
+		if player is holding stick:
+			player is sneaking
+			drop event-block named "%{cells::%location of event-block%::name}%" with lore "&aEnergy: &7%{cells::%location of event-block%::energy}%/%{cells::%location of event-block%::maxenergy}%" at event-block
+			set event-block to air
+			delete {cells::%location of event-block%::*}
+			stop
+		player's tool is not stick
+		player's tool is not daylight sensor named "&6Solar Panel"
+		cancel event
+		set {energistics::%player%::lastused} to location of event-block
+		gui(player,"cellinterface")
+on armor equip:
+	wait 1 tick
+	while name of player's helmet is "&bEnergy Helmet":
+		wait 10 ticks
+		set {_data::*} to uncolored lore of player's helmet parsed as "Energy: %number%/%number%"
+		subtract 1 from {_data::1}
+		if {_data::1} is -1:
+			stop
+		set lore of player's helmet to "&aEnergy: &7%{_data::1}%/%{_data::2}%"
+on sneak toggle:
+	player is sneaking
+	if {fly::%player%} is true:
+		name of player's chestplate contains "Jetpack"
+		lore of player's chestplate contains "&aEnergy"
+		if fly state of player is true:
+			send "&cFlight Disabled" to player
+			set fly state of player to false
+		else:
+			set {_data::*} to uncolored lore of player's chestplate parsed as "Energy: %number%/%number%"
+			if {_data::1} > 0:
+				send "&aFlight Enabled" to player
+				set fly state of player to true
+				jetpack(player)
+	else:
+		set {fly::%player%} to true
+		wait 10 ticks
+		delete {fly::%player%}
+#---------------------------------------#
+#Functions
+#---------------------------------------#
+function updatebattery(p:player,l:location):
+	while name of {_p}'s current inventory is "%{cells::%{_l}%::name}%":
+		wait 10 ticks
+		name of {_p}'s current inventory is "%{cells::%{_l}%::name}%"
+		set slot 1 of {_p}'s current inventory to sunflower named "&aEnergy: &7%{cells::%{_l}%::energy}%/%{cells::%{_l}%::maxenergy}%"
+		if slot 0 of {_p}'s current inventory is not gray glass pane:
+			set {_charging} to {cells::%{_l}%::charging}
+			set lore of {_charging} to "&aEnergy: &7%{cells::%{_l}%::charging.energy}%/%{cells::%{_l}%::charging.maxenergy}%"
+			set slot 0 of {_p}'s current inventory to {_charging}
+function charge(l:location):
+	while {cells::%{_l}%::charging} is set:
+		wait 5 ticks
+		if {cells::%{_l}%::energy} > 0:
+			if {cells::%{_l}%::charging.energy} is {cells::%{_l}%::charging.maxenergy}:
+				stop
+			add 1 to {cells::%{_l}%::charging.energy}
+			subtract 1 from {cells::%{_l}%::energy}
+function slotzeroset(p:player,l:location,i:integer):
+	set {_item} to slot {_i} of {_p}'s current inventory
+	set {_item} to {_p}'s cursor
+	wait 1 tick
+	set {_p}'s cursor slot to air
+	set {_data::*} to uncolored lore of slot 0 of {_p}'s current inventory parsed as "Energy: %integer%/%integer%"
+	set {cells::%{_l}%::charging} to slot 0 of {_p}'s current inventory
+	set {cells::%{_l}%::charging.energy} to {_data::1}
+	set {cells::%{_l}%::charging.maxenergy} to {_data::2}
+	set {cells::%{_l}%::charging.name} to name of slot 0 of {_p}'s current inventory
+	charge({_l})
+function slotzerotake(p:player,l:location,i:integer):
+	set {_item} to slot {_i} of {_p}'s current inventory
+	wait 1 tick
+	set {_p}'s cursor to {_item}
+	set slot {_i} of {_p}'s current inventory to gray glass pane named " "
+	delete {cells::%{_l}%::charging::*}
+	delete {cells::%{_l}%::charging}
+function gui(p:player,t:text):
+	if {_t} is "Cells" or "Items" or "Jetpacks":
+		close {_p}'s inventory
+		set {_list::*} to all yaml nodes of "%{_t}%" where [string input parsed as "%text%.%text%.%text%" is set]
+		set {_size} to ceiling(size of {_list::*} / 36)
+		set {_c} to chest with {_size} + 1 row named "&7&l%{_t}%"
+		set {_set::1} to 4
+		set {_set::2} to 1
+		set {_set::3} to 2
+		set {_set::4} to 3
+		loop size of {_list::*} / 5 times:
+			set {_item::%loop-num%} to yaml value "%{_list::%{_set::1}%}%" from "%{_t}%"
+			set {_name::%loop-num%} to yaml value "%{_list::%{_set::2}%}%" from "%{_t}%"
+			set {_energy::%loop-num%} to yaml value "%{_list::%{_set::3}%}%" from "%{_t}%"
+			set {_maxenergy::%loop-num%} to yaml value "%{_list::%{_set::4}%}%" from "%{_t}%"
+			add 5 to {_set::1}
+			add 5 to {_set::2}
+			add 5 to {_set::3}
+			add 5 to {_set::4}
+		set {_i} to 0
+		loop size of {_list::*} / 5 times:
+			set slot {_i} of {_c} to {_item::%loop-num%} parsed as item named "%colored {_name::%loop-num%}%" with lore "&aEnergy: &7%{_energy::%loop-num%}%/%{_maxenergy::%loop-num%}%"
+			add 1 to {_i}
+		set slot ({_size}*9) of {_c} to barrier named "&c&lBACK"
+		open {_c} to {_p}
+	if {_t} is "cellinterface":
+		open virtual furnace inventory named "%{cells::%{energistics::%{_p}%::lastused}%::name}%" to {_p}
+		set {_loc} to {energistics::%{_p}%::lastused}
+		if {cells::%{energistics::%{_p}%::lastused}%::charging} is set:
+			set slot 0 of {_p}'s current inventory to {cells::%{_loc}%::charging::charging} named "%{cells::%{_loc}%::charging::charging.name}%" with lore "&aEnergy: &7%{cells::%{_loc}%::charging::charging.name}%/%{cells::%{_loc}%::charging::charging.name}%"
+		else:
+			set slot 0 of {_p}'s current inventory to gray glass pane named " "
+		set slot 1 of {_p}'s current inventory to sunflower named "&aEnergy: &7%{cells::%{_loc}%::energy}%/%{cells::%{_loc}%::maxenergy}%"
+		updatebattery({_p},{_loc})
+function load(t:text):
+	set {_list::*} to all yaml nodes of "%{_t}%" where [string input parsed as "%text%.%text%.%text%" is set]
+	loop size of {_list::*} times:
+		set {_list::%loop-num-2%} to yaml value "%{_list::%loop-num-2%}%" from "%{_t}%"
+	set {_1} to size of {_list::*} - 1
+	set {_2} to size of {_list::*}
+	set {_list::%{_1}%} to yaml value "%{_list::%{_1}%}%" from "%{_t}%"
+	set {_list::%{_2}%} to yaml value "%{_list::%{_2}%}%" from "%{_t}%"
+	set {_i5} to 5
+	set {_i4} to 4
+	set {_i3} to 3
+	set {_i2} to 2
+	set {_i1} to 1
+	loop size of {_list::*} / 5 times:
+		set {_req::*} to {_list::%{_i5}%} split at ","
+		loop size of {_req::*} times:
+			set {_req::%loop-num-2%} to {_req::%loop-num-2%} parsed as item
+		set {_list::%{_i4}%} to {_listmhmm\::%{_i4}%} parsed as item
+		register new shaped recipe for {_list::%{_i4}%} named "%colored {_list::%{_i1}%}%" with lore "&aEnergy: %{_list::%{_i2}%}%/%{_list::%{_i3}%}%" using {_req::1}, {_req::2}, {_req::3}, {_req::4}, {_req::5}, {_req::6}, {_req::7}, {_req::8}, {_req::9}
+		add 5 to {_i5}
+		add 5 to {_i4}
+		add 5 to {_i3}
+		add 5 to {_i2}
+		add 5 to {_i1}
+function jetpack(p:player):
+	while name of {_p}'s chestplate contains "JetPack":
+		wait 10 ticks
+		if {_p} is flying:
+			set {_data::*} to uncolored lore of {_p}'s chestplate parsed as "Energy: %number%/%number%"
+			subtract 1 from {_data::1}
+			if {_data::1} is 0:
+				set lore of {_p}'s chestplate to "&aEnergy: &7%{_data::1}%/%{_data::2}%"
+				send "&cFlight Disabled" to {_p}
+				set fly state of {_p} to false
+				stop
+			set lore of {_p}'s chestplate to "&aEnergy: &7%{_data::1}%/%{_data::2}%"
+#---------------------------------------#
+#Commands
+#---------------------------------------#
+command /sp:
+	trigger:
+		give player daylight sensor named "&6Solar Panel"
+command /Energistics [<text>] [<offline player>]:
+	aliases: e
+	trigger:
+		if arg 1 is "help":
+			send "&a&m                                                                                "
+			send "                          &e&lEnergistics V1.0"
+			send " &7- &6/energistics admin &7(opens energistics admin commands)"
+			send " &7- &6/energistics &7(opens energistics interface)"
+			send " &7- &6/energistics help &7(shows this text)"
+			send "&a&m                                                                                "
+		if arg 1 is "admin":
+			if player has permission "energistics.admin":
+				send "&a&m                                                                                "
+				send "                    &e&lEnergistics &e&lV1.0 &c&l(ADMIN)"
+				send " &7- &6/energistics reset <player> &7(resets a player's progress)"
+				send " &7- &6/energistics reload &7(reloads the configs)"
+				send " &7- &6/energistics &7(opens energistics interface)"
+				send " &7- &6/energistics restart &7(&cDeletes EVERYTHING&7)"
+				send " &7- &6/energistics help &7(shows help commands)"
+				send " &7- &6/energistics admin &7(shows this text)"
+				send "&a&m                                                                                "
+			else:
+				send "&cYou do not have permission to this command!"
+		if arg 1 is "reset":
+			if player has permission "energistics.admin":
+				if arg 2 is not set:
+					send "&cPlease specify a player to reset!"
+				else:
+					send "&cAll of %arg 2%'s progress has been reset!"
+			else:
+				send "&cYou do not have permission to this command!"
+		if arg 1 is "reload":
+			if player has permission "energistics.admin":
+				send "&aEnergistics has been reloaded!"
+				unload yaml "Cells"
+				load yaml "plugins/Skript/scripts/Energistics/cells/cells.yml" as "Cells"
+				unload yaml "Items"
+				load yaml "plugins/Skript/scripts/Energistics/items/items.yml" as "Items"
+			else:
+				send "&cYou do not have permission to this command!"
+		if arg 1 is "restart":
+			if player has permission "energistics.admin":
+				delete {energistics::*}
+				delete {cells::*}
+				send "&cEVERYTHING has been deleted!"
+			else:
+				send "&cYou do not have permission to this command!"
+		else if arg 1 is not set:
+			set {_c} to chest with 1 rows named "&a&lEnergistics"
+			set slot 0 of {_c} to iron block named "&b&lCells"
+			set slot 1 of {_c} to diamond pickaxe named "&9&lItems"
+			set slot 2 of {_c} to leather chestplate named "&a&lJetpacks"
+			open {_c} to player
+#---------------------------------------#
+#On place
+#---------------------------------------#
+on place of daylight sensor:
+	name of player's tool is "&6Solar Panel"
+	if {cells::%location of block below event-block%::*} is set:
+		set {sp::%location of event-block%} to true
+		while block at event-block is not air:
+			if time in world is between 6:00 and 18:00:
+				if block below event-block is air:
+					stop
+				if {cells::%location of block below event-block%::energy} is {cells::%location of block below event-block%::maxenergy}:
+					wait 10 ticks
+				else:
+					add 1 to {cells::%location of block below event-block%::energy}
+			wait 10 tick
+on place:
+	lore of player's tool contains "&aEnergy"
+	set {_data::*} to uncolored lore of player's tool parsed as "Energy: %number%/%number%"
+	set {cells::%location of event-block%::name} to name of player's tool
+	set {cells::%location of event-block%::energy} to {_data::1}
+	set {cells::%location of event-block%::maxenergy} to {_data::2}
+#---------------------------------------#
+#On mine
+#---------------------------------------#
+on break of daylight sensor:
+	if {sp::%location of event-block%} is set:
+		cancel event
+		set block to air
+		drop daylight sensor named "&6Solar Panel" at event-block
+		delete {sp::%location of event-block%}
+on break:
+	if {cells::%location of event-block%::*} is set:
+		cancel event
+		set block to air
+		drop iron block named "%{cells::%location of event-block%::name}%" with lore "&aEnergy: &70/%{cells::%location of event-block%::maxenergy}%" at event-block
+		delete {cells::%location of event-block%::*}
+	if lore of player's tool contains "&aEnergy":
+		set {_data::*} to uncolored lore of player's tool parsed as "Energy: %integer%/%integer%"
+		if {_data::1} is 0:
+			cancel event
+			stop
+		subtract 1 from {_data::1}
+		set {_tdura} to ({_data::1} / {_data::2}) * max durability of player's tool
+		set durability of player's tool to max durability of player's tool - {_tdura}
+		set lore of player's tool to "&aEnergy: &7%{_data::1}%/%{_data::2}%"
+
