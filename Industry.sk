@@ -1,0 +1,329 @@
+aliases:
+	ws = :69
+
+command /X [<text>] [<text>]:
+	trigger:
+		if arg 1 is "kit":
+			if arg 2 is "xinshou":
+				open chest with 1 row named "&1&l新手礼包" to player
+				set slot 0 of player's current inventory to a dispenser
+on right click on sign:
+	player is not sneaking
+	line 1 of the block is "[Craft]" or "[craft]"
+	block below is dispenser:
+		slot 1 of the block below is a iron ingot
+		slot 0 of the block below is a gold ingot
+		message "fuck"
+on place of wood plank:
+	if name of player's tool is "&6筛子":
+		set {sz.%location of event-block%} to 1
+on break of wood plank:
+	if {sz.%location of the block%} is set:
+		cancel event
+		delete {sz.%location of event-block%}
+		set event-block to air
+		drop 1 normal wood plank named "&6筛子"
+command /sz:
+	trigger:
+		if player is op:
+			give player a normal wood plank named "&6筛子"
+on right click on wood plank:
+	if {sz.%location of event-block%} is set:
+		if player is holding a dirt:
+			cancel event
+			remove 1 dirt from player's inventory
+			set {_random} to a random integer between 0 and 4
+			drop {_random} of firework star named "&e石子"
+			stop
+		if player is holding a gravel:
+			cancel event
+			remove 1 gravel from player's inventory
+			set {_random} to a random integer between 1 and 3
+			set {_random.item} to a random integer between 1 and 2
+			if {_random} = 1:
+				drop {_random.item} of gray dye named "&7破碎的铁"
+			if {_random} = 2:
+				drop {_random.item} of yellow dye named "&7破碎的金"
+			if {_random} = 3:
+				drop 1 of coal
+		if player is holding a sand:
+			cancel event
+			remove 1 sand from player's inventory
+			set {_random} to a random integer between 1 and 3
+			set {_random.item} to a random integer between 1 and 2
+			if {_random} = 1:
+				drop {_random.item} of redstone
+	if {mt.%location of event-block%} is set:
+		if player is holding 8 normal sapling:
+			cancel event
+			remove 8 normal sapling from player's inventory
+			wait 20 seconds
+			spawn a falling dirt 4 meters above the event-block
+		if player is holding 8 apple:
+			cancel event
+			remove 8 apple from player's inventory
+			wait 20 seconds
+			spawn a falling dirt 4 meters above the event-block
+		if player is holding 16 rotten flesh:
+			cancel event
+			remove 16 rotten flesh from player's inventory
+			wait 20 seconds
+			spawn a falling dirt 4 meters above the event-block
+command /mt:
+	trigger:
+		if player is op:
+			give player 1 normal wood plank named "&6木桶"
+on place of wood plank:
+	if name of player's tool is "&6木桶":
+		set {mt.%location of event-block%} to 1
+on break of wood plank:
+	if {mt.%location of the block%} is set:
+		cancel event
+		delete {mt.%location of event-block%}
+		set event-block to air
+		drop 1 normal wood plank named "&6木桶"
+on place of cauldron:
+	if name of player's tool is "&6简陋的肥料榨取机":
+		set {fl.%location of event-block%} to 1
+on break of cauldron:
+	if {fl.%location of the block%} is set:
+		cancel event
+		delete {fl.%location of event-block%}
+		set event-block to air
+		drop 1 cauldron named "&6简陋的肥料榨取机" with lore "&7可以在机器里面||&7榨取骨粉"
+on right click on cauldron:
+	if {fl.%location of the block%} is set:
+		cancel event
+		open chest with 1 row named "&6&l肥料榨取" to player
+		wait 1 tick
+		format slot 0 of player with bonemeal named "&6点我榨取肥料" with lore "&7需要：12个泥土" to run "sudo %player% flzq"
+		format slot 1 of player with cobblestone named "&6点我合成圆石" with lore "&7需要：4个石子" to run "sudo %player% shizi"
+command /flzq:
+	trigger:
+		if player have 12 dirt:
+			remove 12 dirt from player's inventory
+			chance of 30%:
+				give 1 bonemeal to player
+				message "&d榨取成功！"
+			else:
+				message "&7榨取失败"
+command /shizi:
+	trigger:
+		if player have 4 firework star named "&e石子":
+			remove 4 firework star named "&e石子" from player's inventory
+			give 1 cobblestone to player
+on leftclick on grass:
+	if player is holding a bonemeal:
+		remove 1 bonemeal from player's inventory
+		chance of 10%:
+			drop 1 normal sapling
+on rightclick on crafting table:
+	if block below is a dispenser:
+		cancel event
+		if block below contain 8 gray dye named "&7破碎的铁":
+			remove 8 gray dye named "&7破碎的铁" from block below's inventory
+			add 1 iron ore to block below's inventory
+	if block below is a dispenser:
+		cancel event
+		if block below contain 8 yellow dye named "&7破碎的金":
+			remove 8 yellow dye named "&7破碎的金" from block below's inventory
+			add 1 gold ore to block below's inventory
+	if block below is a dispenser:
+		cancel event
+		if slot 0 of the block below is a cobblestone:
+			if slot 1 of the block below is a iron pickaxe:
+				if slot 2 of the block below is a cobblestone:
+					if slot 3 of the block below is a cobblestone:
+						if slot 4 of the block below is a piston:
+							if slot 5 of the block below is a cobblestone:
+								if slot 6 of the block below is a cobblestone:
+									if slot 7 of the block below is a redstone:
+										if slot 8 of the block below is a cobblestone:
+											remove 6 cobblestone from block below
+											remove 1 iron pickaxe from block below
+											remove 1 piston from block below
+											remove 1 redstone from block below
+											add 1 sponge named "&6方块破坏机" to block below's inventory
+	if slot 1 of the block below is a stick:
+		if slot 3 of the block below is a stick:
+			if slot 5 of the block below is a stick:
+				if slot 7 of the block below is a stick:
+					remove 4 stick from block below
+					add 1 fence named "&6木齿轮" to block below's inventory
+	if slot 1 of the block below is a stone:
+		if slot 3 of the block below is a stone:
+			if slot 4 of the block below is a fence named "&6木齿轮":
+				if slot 5 of the block below is a stone:
+					if slot 7 of the block below is a stone:
+						remove 4 stone from block below
+						remove 1 fence named "&6木齿轮" from block below
+						add 1 cobble wall named "&6石齿轮" to block below's inventory
+	if block below is a dispenser:
+		cancel event
+		if slot 0 of the block below is a cobble wall named "&6石齿轮":
+			if slot 1 of the block below is a cobble wall named "&6石齿轮":
+				if slot 2 of the block below is a cobble wall named "&6石齿轮":
+					if slot 3 of the block below is a cobble wall named "&6石齿轮":
+						if slot 4 of the block below is a furnace:
+							if slot 5 of the block below is a cobble wall named "&6石齿轮":
+								if slot 6 of the block below is a cobble wall named "&6石齿轮":
+									if slot 7 of the block below is a cobble wall named "&6石齿轮":
+										if slot 8 of the block below is a cobble wall named "&6石齿轮":
+											remove 8 cobble wall named "&6石齿轮" from block below
+											remove 1 furnace from block below
+											add 1 nether star named "&6水力烧制机组件" to block below's inventory
+	if block below is a dispenser:
+		cancel event
+		if slot 0 of the block below is a iron block:
+			if slot 1 of the block below is a redstone:
+				if slot 2 of the block below is a iron block:
+					if slot 3 of the block below is a iron block:
+						if slot 4 of the block below is a fishing rod:
+							if slot 5 of the block below is a iron block:
+								if slot 6 of the block below is a iron block:
+									if slot 7 of the block below is a redstone:
+										if slot 8 of the block below is a iron block:
+											remove 6 iron block from block below
+											remove 1 redstone from block below
+											remove 1 cobble wall named "&6石齿轮" from block below
+											remove 1 fishing rod from block below
+											add 1 dispenser named "&6钓鱼机" to block below's inventory
+on rightclick on gravel:
+	if name of player's tool is "&e锤子":
+		set the event-block to air
+		drop 1 sand
+		damage tool of player by 1
+On Redstone:
+		if block below the block below is bedrock:
+				stop
+		if block below the block below is obsidian:
+				stop
+		if block below the block below is sponge:
+				stop
+		if block below the block below is redstone block:
+				stop
+		block below is sponge
+		set {block.%location of block below%} to the type of the block below the block below
+		set block below the block below to air
+		drop 1 of {block.%location of block below%} at event-location
+		delete {block.%location of block below%}
+on break of sponge:
+	cancel event
+	set event-block to air
+	drop 1 sponge named "&6方块破坏机"
+on spawn of a skeleton:
+	loop blocks in radius 16:
+		loop-block is command block:
+			if loop-block exist:
+				cancel event
+on place of dispenser:
+	if name of player's tool is "&6钓鱼机":
+		set {fisher.%location of event-block%} to 1
+		add 1 dirt named "&7机器核心" to event-block's inventory
+		message "&7你放置了钓鱼机"
+on break of dispenser:
+	if {fisher.%location of event-block%} is set:
+		cancel event
+		clear event-block's inventory
+		set event-block to air
+		delete {fisher.%location of event-block%}
+		message "&7钓鱼机已经破坏"
+		drop 1 dispenser named "&6钓鱼机"
+on dispense:
+	if {fisher.%location of event-block%} is set:
+		cancel event
+		block above is chest
+		block below is water source
+		chance of 3%:
+			add 1 fish to block above
+		chance of 0.1%:
+			add 1 iron ingot to block above
+		chance of 0.1%:
+			add 1 bread named "&7腐烂&6面包" to block above
+		chance of 0.1%:
+			set {_nj} to a random integer between 1 to 100
+on rightclick on dispenser:
+	if {fisher.%location of event-block%} is set:
+		cancel event
+on break of redstone block:
+	cancel event
+	set event-block to air
+on rightclick with fence:
+	name of player's tool is "&6木齿轮"
+	cancel event
+on rightclick with cobble wall:
+	name of player's tool is "&6石齿轮"
+	cancel event
+on rightclick on iron block:
+	if block east is moving water:
+		if block west is moving water:
+			if block north is moving water:
+				if block south is moving water:
+					if block below is bedrock:
+						drop 1 iron ingot
+on rightclick on crafting table:
+	if block above is a fence:
+		cancel event
+		if {slsz.%location of event-block%} is set:
+			block west of block above is fence
+			block east of block above is fence
+			block south of block above is fence
+			block north of block above is fence
+			block below is water source
+			loop blocks in radius 1:
+				loop-block is chest
+				if loop-block contain 1 sugar named "&6铁粉":
+					remove 1 sugar named "&6铁粉" from loop-block
+					set block below to air
+					wait 1 second
+					set {_loc} to location of event-block
+					show 100 "lava" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "lava" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "lava" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "lava" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "lava" particles at {_loc} for player offset by 1, 1, 1
+					add 1 iron ingot to loop-block
+		else:
+			block west of block above is fence
+			block east of block above is fence
+			block south of block above is fence
+			block north of block above is fence
+			block below is water source
+			loop blocks in radius 1:
+				loop-block is chest
+				if loop-block contain 1 iron ore:
+					remove 1 iron ore from loop-block
+					set block below to air
+					wait 1 second
+					set {_loc} to location of event-block
+					show 100 "cloud" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "cloud" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "cloud" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "cloud" particles at {_loc} for player offset by 1, 1, 1
+					wait 1 second
+					show 100 "cloud" particles at {_loc} for player offset by 1, 1, 1
+					add 2 sugar named "&6铁粉" to loop-block
+			
+on leftclick on crafting table:
+	if name of player's tool is "&6水力烧制机组件":
+		if block above is fence:
+			cancel event
+			block west of block above is fence
+			block east of block above is fence
+			block south of block above is fence
+			block north of block above is fence
+			block below is water source
+			remove 1 nether star named "&6水力烧制机组件" from player's inventory
+			set {slsz.%location of event-block%} to 1
+			message "水力烧制机已经设置！"
+on break of crafting table:
+	if {slsz.%location of event-block%} is set:
+		delete {slsz.%location of event-block%}
+		drop 1 nether star named "&6水力烧制机组件"
